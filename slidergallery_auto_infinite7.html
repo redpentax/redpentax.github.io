@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Slider Gallery 깃허브로 수정하다</title>
+	<style>
+		* {margin: 0;padding: 0;}
+		div.item:nth-child(1) {background:red;} 
+		div.item:nth-child(2) {background:green;}
+		div.item:nth-child(3) {background:blue;} 	
+		div.item:nth-child(4) {background:cyan;} 	
+		div.item:nth-child(5) {background:yellow;} 	
+		button {width:35px; height:40px; font-size: 35px;opacity: 0.5;text-align: center;line-height: 30px;}
+		button:hover {opacity: 1;cursor: pointer;}
+		#indicater {position:absolute;bottom: 0;opacity: 0.7;}
+		#indicater li {list-style: square;display: inline-block;width: 20px;height: 20px;background-color:white;border-radius: 50%;text-align: center;color:darkgreen;border:2px solid goldenrod;}
+		#indicater li:hover {cursor: pointer;}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			// 변수 선언 =========================================================================
+			var count = $('.container > div.item').length; // 슬라이더 콘텐츠 갯수 추출
+			var indi_width = $('#indicater').width(); // 인디케이터의 가로폭 추출
+			var width = 300, height = 150, autoTime = 1250; //슬라이드의 가로/세로/자동시간 지정
+			// 슬라이드 콘텐츠의 CSS변경 ====================================== 
+			$('#slider').css({
+				position: 'relative',
+				overflow: '',
+				width: width,
+				height: height,
+				left:500
+			});
+			$('.container').css({
+				position: 'absolute',
+				left:0,
+				top:0,
+				width: count * width,
+				height: height,
+				overflow: ''
+			});
+			$('.item').css({
+				width: width,
+				height: height,
+				position: 'absolute'
+				// float : 'left'
+			});
+			
+			for(var i=0; i < count; i++){
+				var posLeft = width * i;
+				$('.container .item').eq(i).css('left',posLeft);
+			}
+		
+			// 버튼위치 및 인디케이터의 위치 CSS변경 ================
+			$('button').css({
+				position:'absolute',
+				top : height/2 - 20
+			});
+			$('#right-button').css({
+				right : 0
+			});
+			$('#indicater').css({
+				left: (width/2) - (indi_width/2) 
+			});
+			$('#indicater li:first-child').css({
+				backgroundColor : 'black'
+			});
+			// 핵심 구현 코드 시작  ==============================================================
+			var currentPage = 0;
+			var direction = true;
+			var changePage;
+			var newpos = (width*count)-width;
+			var newpos2 = -width;
+			  // 슬라이더를 이동 시키는 함수 정의
+			function gotoSlide(currentPage){
+				var indicaterEq = currentPage % count; 
+				//var indicaterEq = (currentPage-1) % count; 
+				if(direction == true){
+                    var neweq = (currentPage) % count;	
+					$('#slider > .container').stop(false).animate({
+						left: -currentPage * width 
+					}, 350,function(){
+
+						$('.item').eq(indicaterEq-1).css('left', newpos);
+					});
+
+					
+						
+					// if(currentPage >= count){
+                    //     $('.item').eq(neweq).css('left', newpos);
+                    // }	
+					console.log(indicaterEq);
+						newpos += width;
+					$('#indicater li').css('background-color','');
+					$('#indicater li').eq(indicaterEq).css('background-color','black');
+				}
+				// if(direction == false){
+                //     var neweq = (currentPage+1) % count;	
+				// 	neweq2 = Math.abs(neweq);
+				// 	$('.item').eq(4-neweq2).css('left', newpos2);
+				// 		console.log(neweq2);	
+				// 	$('#slider > .container').stop(true).animate({
+				// 		left: -currentPage * width 
+				// 	}, 350);
+				// 	newpos2 -= width;	
+					
+				// 	$('#indicater li').css('background-color','');
+				// 	$('#indicater li').eq(4-indicaterEq).css('background-color','black');
+				// }    
+			};
+			  // 자동 슬라이드를 위한, currentPage변수값을 변화시키는 함수 정의 
+			function startTimer(){ 
+				changePage = setInterval(function(){
+					// if(currentPage == count-1){
+					// 	direction = false;
+					// }  // 슬라이드 방향을 결정하는 조건문 
+					// if(currentPage == 0){
+					// 	direction = true;
+					// }  // 슬라이드 방향을 결정하는 조건문 
+					if(direction == true){
+						currentPage++;
+						gotoSlide(currentPage);
+					} // 정 방향에 따른 gotoSlide함수 호출
+					if(direction == false){
+						currentPage--;
+						gotoSlide(currentPage);
+					} // 역 방향에 따른 gotoSlide함수 호출
+					// currentPage++;
+					// gotoSlide(currentPage);
+				},autoTime);
+			} 
+			startTimer(); // setInterval을 실행하기 위한 함수의 호출
+			// 슬라이드 콘텐츠에 마우스 이벤트 연결 ===========================
+			  // 마우스 오버/아웃시 자동 슬라이딩을 멈추게 하는 이벤트
+			$('#slider').mouseover(function(){
+				clearInterval(changePage); // 마우스가 올라가면 setInterval을 정지 시킴
+			})
+			$('#slider').mouseout(function(){
+				startTimer(); // 마우스가 벗어나면 setInterval을 실행 시킴
+			})
+			  // 좌,우 버튼을 클릭 했을 때 슬라이딩을 구현하는 이벤트
+			$('#left-button').click(function(){
+				// if (currentPage > 0){
+				// }
+				direction = false;
+				currentPage -= 1;
+				gotoSlide(currentPage);
+			});
+			$('#right-button').click(function(){
+				// if (currentPage < count - 1){
+				// }
+				direction = true;
+				currentPage++;
+				gotoSlide(currentPage);
+			});
+			  // 인디케이터를 클릭했을 때 해당 페이지로 이동하는 이벤트 
+			// $('ul#indicater li').click(function(){
+			// 	var myindex = $(this).index();  // 클릭한 인디케이터의 index번호를 추출
+			// 	currentPage = myindex;
+			// 	gotoSlide(currentPage);
+			// });
+		});	
+	</script>
+</head>
+<body>
+	<div id="slider">
+		<div class="container">
+			<div class="item">
+				<h1>Slider A</h1><p>background Red background Red</p>
+			</div>
+			<div class="item">
+				<h1>Slider B</h1><p>background Green background Green</p>
+			</div>
+			<div class="item">
+				<h1>Slider C</h1><p>background Blue background Blue</p>
+			</div>
+			<div class="item">
+				<h1>Slider D</h1><p>background Cyan background Cyan</p>
+			</div>
+			<div class="item">
+				<h1>Slider E</h1><p>background Yellow background Yellow</p>
+			</div>
+		</div>
+		<button id="left-button">&lsaquo;</button>
+		<button id="right-button">&rsaquo;</button>
+		<ul id="indicater">
+			<li>1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+			<li>5</li>
+		</ul>
+	</div>
+	</body>
+</html>
